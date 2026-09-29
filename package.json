@@ -1,7 +1,7 @@
 {
-  "name": "fintech-wallet-app-server",
+  "name": "event-driven-order-system",
   "version": "1.0.0",
-  "description": "fintech wallet app",
+  "description": "Event Driven Order System",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
