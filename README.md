@@ -19,6 +19,7 @@ This service handles the complete order lifecycle in an event-driven architectur
 - Exactly-once processing guarantees using the **Transactional Outbox** pattern + idempotent consumers
 
 **Key capabilities:**
+
 - Asynchronous processing with Kafka
 - Strong consistency between Order and Inventory
 - Idempotent event handlers
@@ -29,46 +30,46 @@ This service handles the complete order lifecycle in an event-driven architectur
 ## Architecture
 
 Client / API
-     │
-     ▼
+│
+▼
 ┌─────────────────────┐
-│   Order Service     │  (NestJS)
-│  - Create Order     │
-│  - Outbox Writer    │
+│ Order Service │ (NestJS)
+│ - Create Order │
+│ - Outbox Writer │
 └──────────┬──────────┘
-           │ (same DB transaction)
-           ▼
+│ (same DB transaction)
+▼
 ┌─────────────────────┐
-│   PostgreSQL        │
-│  - orders           │
-│  - inventory        │
-│  - outbox           │
+│ PostgreSQL │
+│ - orders │
+│ - inventory │
+│ - outbox │
 └──────────┬──────────┘
-           │ Outbox Relay / CDC
-           ▼
+│ Outbox Relay / CDC
+▼
 ┌─────────────────────┐
-│       Kafka         │
-│  order.created      │
-│  inventory.reserved │
-│  order.completed    │
+│ Kafka │
+│ order.created │
+│ inventory.reserved │
+│ order.completed │
 └──────────┬──────────┘
-           │
-     ┌─────┴─────┐
-     ▼           ▼
-┌─────────┐  ┌────────────┐
-│Inventory│  │  Other     │
-│Consumer │  │ Consumers  │
-└─────────┘  └────────────┘
+│
+┌─────┴─────┐
+▼ ▼
+┌─────────┐ ┌────────────┐
+│Inventory│ │ Other │
+│Consumer │ │ Consumers │
+└─────────┘ └────────────┘
 
 ### Design Decisions & Trade-offs
 
-| Decision | Why | Trade-off |
-|----------|-----|---------|
-| Transactional Outbox | Guarantees that the event is only published if the DB transaction commits | Requires an outbox relay process |
-| Idempotent consumers | Safe retries and exactly-once effect | Extra storage for processed event IDs |
-| NestJS + Kafka | Clean modular structure + first-class microservice support | Slightly steeper learning curve than plain Express |
-| PostgreSQL | Strong consistency + excellent support for transactions and JSON | Vertical scaling limits compared to distributed DBs |
-| Event-driven choreography | Loose coupling between Order and Inventory | Harder to track overall business transaction (can add Saga later) |
+| Decision                  | Why                                                                       | Trade-off                                                         |
+| ------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Transactional Outbox      | Guarantees that the event is only published if the DB transaction commits | Requires an outbox relay process                                  |
+| Idempotent consumers      | Safe retries and exactly-once effect                                      | Extra storage for processed event IDs                             |
+| NestJS + Kafka            | Clean modular structure + first-class microservice support                | Slightly steeper learning curve than plain Express                |
+| PostgreSQL                | Strong consistency + excellent support for transactions and JSON          | Vertical scaling limits compared to distributed DBs               |
+| Event-driven choreography | Loose coupling between Order and Inventory                                | Harder to track overall business transaction (can add Saga later) |
 
 ## Tech Stack
 
@@ -84,7 +85,6 @@ Client / API
 ```bash
 git clone https://github.com/olabodeIdowu/event-driven-order-system.git
 cd event-driven-order-system
-cp .env.example .env
 docker-compose up --build
 
 API will be available at: http://localhost:3000Create a test orderbash
@@ -139,4 +139,4 @@ Add full Saga pattern for distributed transactions
 Introduce schema registry (Avro / JSON Schema)
 Add OpenTelemetry tracing across services
 Implement compensating transactions for failures
-
+```
